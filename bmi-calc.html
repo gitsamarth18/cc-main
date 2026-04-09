@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Calculator - BMI & Calorie Tracker</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f0c29 0%, #302b63 25%, #24243e 50%, #1a1a3e 75%, #16213e 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      color: #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .header-bar {
+      width: 100%;
+      background: rgba(20, 25, 50, 0.9);
+      backdrop-filter: blur(10px);
+      border-bottom: 2px solid rgba(110, 170, 219, 0.3);
+      padding: 25px 20px;
+      text-align: center;
+      animation: slideDownHeader 0.5s ease;
+    }
+
+    @keyframes slideDownHeader {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .header-title {
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #6eaadb 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 1px;
+    }
+
+    .main-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      max-width: 900px;
+      width: 100%;
+      padding: 40px 20px;
+    }
+
+    @media (max-width: 768px) {
+      .main-wrapper {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .calculator-card {
+      background: rgba(20, 25, 50, 0.85);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(100, 150, 255, 0.2);
+      animation: slideIn 0.6s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .calculator-card:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #a0a0b0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #404060;
+      border-radius: 10px;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      background: #1a1f3a;
+      color: #e0e0e0;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #6eaadb;
+      background: #242850;
+      box-shadow: 0 0 0 3px rgba(110, 170, 219, 0.2);
+    }
+
+    input::placeholder {
+      color: #606080;
+    }
+
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236eaadb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 18px;
+      padding-right: 40px;
+      color-scheme: dark;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.2);
+      transition: left 0.3s ease;
+    }
+
+    button:hover::before {
+      left: 100%;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .result {
+      margin-top: 25px;
+      padding: 20px;
+      border-radius: 12px;
+      backdrop-filter: blur(5px);
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+      opacity: 0;
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .result.empty {
+      opacity: 0;
+      display: none;
+    }
+
+    .result.underweight {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(96, 165, 250, 0.2));
+      border: 2px solid #3b82f6;
+      color: #1e40af;
+    }
+
+    .result.normal {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(74, 222, 128, 0.2));
+      border: 2px solid #22c55e;
+      color: #166534;
+    }
+
+    .result.overweight {
+      background: linear-gradient(135deg, rgba(251, 146, 60, 0.2), rgba(253, 186, 116, 0.2));
+      border: 2px solid #fb923c;
+      color: #92400e;
+    }
+
+    .result.obese {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(248, 113, 113, 0.2));
+      border: 2px solid #ef4444;
+      color: #991b1b;
+    }
+
+    .result.calories {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(217, 70, 239, 0.2));
+      border: 2px solid #a855f7;
+      color: #581c87;
+    }
+
+    .result-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .result-icon {
+      font-size: 28px;
+    }
+
+    .result-text {
+      text-align: left;
+    }
+
+    .result-label {
+      font-size: 12px;
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .result-value {
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .hr-divider {
+      margin: 0;
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #404060, transparent);
+      margin: 30px 0;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .refresh-btn {
+      background: rgba(110, 170, 219, 0.2);
+      border: 2px solid #6eaadb;
+      color: #6eaadb;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .refresh-btn:hover {
+      background: #6eaadb;
+      color: #0f0c29;
+      transform: scale(1.05);
+    }
+
+    .refresh-btn:active {
+      transform: scale(0.98);
+    }
+
+    .welcome-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      animation: fadeInModal 0.3s ease;
+    }
+
+    .welcome-modal.show {
+      display: flex;
+    }
+
+    @keyframes fadeInModal {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .welcome-content {
+      background: linear-gradient(135deg, rgba(20, 25, 50, 0.95) 0%, rgba(40, 50, 100, 0.95) 100%);
+      border: 2px solid rgba(100, 150, 255, 0.3);
+      border-radius: 25px;
+      padding: 50px;
+      max-width: 500px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+      animation: slideInWelcome 0.5s ease;
+    }
+
+    @keyframes slideInWelcome {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .welcome-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+    }
+
+    .welcome-title {
+      font-size: 35px;
+      font-weight: 800;
+      margin-bottom: 15px;
+      background: linear-gradient(135deg, #6eaadb 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .welcome-subtitle {
+      font-size: 16px;
+      color: #a0a0b0;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .welcome-button {
+      background: linear-gradient(135deg, #6eaadb 0%, #a78bfa 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 10px 30px rgba(110, 170, 219, 0.3);
+    }
+
+    .welcome-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px rgba(110, 170, 219, 0.5);
+    }
+
+    .welcome-button:active {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- Header Bar -->
+<div class="header-bar">
+  <div class="header-title">💪 BMI Calculator : Programmed & Developed by - Samarth Mahale</div>
+</div>
+
+<!-- Welcome Modal -->
+<div class="welcome-modal" id="welcomeModal">
+  <div class="welcome-content">
+    <div class="welcome-icon">💪</div>
+    <h1 class="welcome-title">Welcome!</h1>
+    <p class="welcome-subtitle">Welcome to your personal Health Calculator! Track your BMI and daily calorie needs with ease. Let's start your fitness journey today!</p>
+    <button class="welcome-button" onclick="closeWelcome()">Get Started</button>
+  </div>
+</div>
+
+<div class="main-wrapper">
+  <!-- BMI Calculator Card -->
+  <div class="calculator-card">
+    <div class="card-header">
+      <h2>📊 BMI Calculator</h2>
+      <button class="refresh-btn" onclick="clearBMI()">🔄 Reset</button>
+    </div>
+
+    <div class="form-group">
+      <label for="weight">Weight</label>
+      <input type="number" id="weight" placeholder="Enter weight in kg" step="0.1" min="0">
+    </div>
+
+    <div class="form-group">
+      <label for="height">Height</label>
+      <input type="number" id="height" placeholder="Enter height in cm" step="0.1" min="0">
+    </div>
+
+    <button onclick="calculateBMI()">Calculate BMI</button>
+
+    <div class="result empty" id="bmiResult"></div>
+  </div>
+
+  <!-- Calorie Calculator Card -->
+  <div class="calculator-card">
+    <div class="card-header">
+      <h2>🔥 Calorie Calculator</h2>
+      <button class="refresh-btn" onclick="clearCalories()">🔄 Reset</button>
+    </div>
+
+    <div class="form-group">
+      <label for="age">Age</label>
+      <input type="number" id="age" placeholder="Enter your age" min="1" max="120">
+    </div>
+
+    <div class="form-group">
+      <label for="gender">Gender</label>
+      <select id="gender">
+        <option value="male">👨 Male</option>
+        <option value="female">👩 Female</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="calWeight">Weight</label>
+      <input type="number" id="calWeight" placeholder="Enter weight in kg" step="0.1" min="0">
+    </div>
+
+    <div class="form-group">
+      <label for="calHeight">Height</label>
+      <input type="number" id="calHeight" placeholder="Enter height in cm" step="0.1" min="0">
+    </div>
+
+    <div class="form-group">
+      <label for="activity">Activity Level</label>
+      <select id="activity">
+        <option value="1.2">🛋️ Sedentary (little to no exercise)</option>
+        <option value="1.375">🚶 Light Activity (1-3 days/week)</option>
+        <option value="1.55">🏃 Moderate Activity (3-5 days/week)</option>
+        <option value="1.725">💪 Very Active (6-7 days/week)</option>
+      </select>
+    </div>
+
+    <button onclick="calculateCalories()">Calculate Calories</button>
+
+    <div class="result empty" id="calorieResult"></div>
+  </div>
+</div>
+
+<script>
+  // Show welcome modal on page load
+  window.addEventListener('load', function() {
+    const welcomeShown = localStorage.getItem('welcomeShown');
+    if (!welcomeShown) {
+      document.getElementById('welcomeModal').classList.add('show');
+      localStorage.setItem('welcomeShown', 'true');
+    }
+  });
+
+  // Close welcome modal
+  function closeWelcome() {
+    const modal = document.getElementById('welcomeModal');
+    modal.style.opacity = '0';
+    modal.style.transition = 'opacity 0.3s ease';
+    setTimeout(() => {
+      modal.classList.remove('show');
+      modal.style.opacity = '1';
+    }, 300);
+  }
+
+  // Close modal when clicking outside
+  document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('welcomeModal');
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closeWelcome();
+      }
+    });
+  });
+
+  // Clear BMI Calculator
+  function clearBMI() {
+    document.getElementById("weight").value = '';
+    document.getElementById("height").value = '';
+    document.getElementById("bmiResult").classList.add('empty');
+    document.getElementById("bmiResult").innerHTML = '';
+  }
+
+  // Clear Calorie Calculator
+  function clearCalories() {
+    document.getElementById("age").value = '';
+    document.getElementById("gender").value = 'male';
+    document.getElementById("calWeight").value = '';
+    document.getElementById("calHeight").value = '';
+    document.getElementById("activity").value = '1.2';
+    document.getElementById("calorieResult").classList.add('empty');
+    document.getElementById("calorieResult").innerHTML = '';
+  }
+
+  function calculateBMI() {
+    let weight = document.getElementById("weight").value;
+    let height = document.getElementById("height").value / 100;
+    const resultDiv = document.getElementById("bmiResult");
+
+    if (!weight || !height || weight <= 0 || height <= 0) {
+      resultDiv.innerHTML = '<div class="result-content"><span class="result-icon">⚠️</span><span>Please enter valid weight and height</span></div>';
+      resultDiv.classList.remove("empty");
+      return;
+    }
+
+    let bmi = (weight / (height * height)).toFixed(2);
+    let status = "";
+    let statusClass = "";
+    let icon = "";
+
+    if (bmi < 18.5) {
+      status = "Underweight";
+      statusClass = "underweight";
+      icon = "🔵";
+    } else if (bmi < 24.9) {
+      status = "Normal Weight";
+      statusClass = "normal";
+      icon = "🟢";
+    } else if (bmi < 29.9) {
+      status = "Overweight";
+      statusClass = "overweight";
+      icon = "🟠";
+    } else {
+      status = "Obese";
+      statusClass = "obese";
+      icon = "🔴";
+    }
+
+    resultDiv.className = `result ${statusClass}`;
+    resultDiv.innerHTML = `
+      <div class="result-content">
+        <span class="result-icon">${icon}</span>
+        <div class="result-text">
+          <div class="result-label">Your BMI</div>
+          <div class="result-value">${bmi}</div>
+          <div class="result-label" style="margin-top: 5px;">${status}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function calculateCalories() {
+    let age = document.getElementById("age").value;
+    let gender = document.getElementById("gender").value;
+    let weight = document.getElementById("calWeight").value;
+    let height = document.getElementById("calHeight").value;
+    let activity = document.getElementById("activity").value;
+    const resultDiv = document.getElementById("calorieResult");
+
+    if (!age || !weight || !height || age <= 0 || weight <= 0 || height <= 0) {
+      resultDiv.innerHTML = '<div class="result-content"><span class="result-icon">⚠️</span><span>Please enter valid data for all fields</span></div>';
+      resultDiv.classList.remove("empty");
+      return;
+    }
+
+    let bmr;
+
+    if (gender === "male") {
+      bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+    } else {
+      bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+    }
+
+    let calories = (bmr * activity).toFixed(0);
+
+    resultDiv.className = "result calories";
+    resultDiv.innerHTML = `
+      <div class="result-content">
+        <span class="result-icon">🔥</span>
+        <div class="result-text">
+          <div class="result-label">Daily Calorie Needs</div>
+          <div class="result-value">${calories} kcal</div>
+        </div>
+      </div>
+    `;
+  }
+</script>
+
+</body>
+</html>
